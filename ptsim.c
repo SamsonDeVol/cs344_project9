@@ -24,7 +24,10 @@ int get_address(int page, int offset)
 //
 void initialize_mem(void)
 {
-    // TODO
+    for (int i = 0; i < MEM_SIZE; i++){
+        mem[i] = 0;
+    }
+    mem[0] = 1;
 }
 
 //
@@ -34,7 +37,13 @@ void initialize_mem(void)
 //
 unsigned char get_page(void)
 {
-    // TODO
+    for (int i = 1; i < PAGE_COUNT; i++){
+        if (mem[i] == 0){
+            mem[i] = 1;
+            return i;
+        }
+    }
+    return 0xff;
 }
 
 //
@@ -44,7 +53,21 @@ unsigned char get_page(void)
 //
 void new_process(int proc_num, int page_count)
 {
-    // TODO
+    int page_table = get_page();
+    mem[64 + proc_num] = page_table;
+    if (proc_num > PAGE_COUNT){
+         printf("OOM: proc %d: page table\n", proc_num);
+         return;
+    }
+    if (page_count > (PAGE_SIZE - 2)){
+            printf("OOM: proc %d: data page\n", proc_num);
+            return;
+        }
+    for (int i = 0; i < page_count; i++){
+        unsigned char new_page = get_page();
+        int pt_addr = get_address(page_table, i);
+        mem[pt_addr] = new_page;
+    }
 }
 
 //
